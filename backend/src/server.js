@@ -1,0 +1,30 @@
+require('dotenv').config()
+const express = require('express')
+const http = require('http')
+const cors = require('cors')
+const { initWebSocket } = require('./websocket')
+const apiRoutes = require('./routes/api')
+
+const app  = express()
+const PORT = process.env.PORT || 3001
+
+// Middlewares
+app.use(cors({ origin: 'http://localhost:5173' }))
+app.use(express.json())
+
+// Rutas REST
+app.use('/api', apiRoutes)
+
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() })
+})
+
+// Servidor HTTP + WebSocket comparten el mismo puerto
+const server = http.createServer(app)
+initWebSocket(server)
+
+server.listen(PORT, () => {
+  console.log(` Servidor corriendo en http://localhost:${PORT}`)
+  console.log(` WebSocket disponible en ws://localhost:${PORT}`)
+})
