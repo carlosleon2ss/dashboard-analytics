@@ -70,8 +70,8 @@ export function Navbar({ status, latency }) {
           background: 'linear-gradient(135deg, var(--blue), var(--purple))',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 12, fontWeight: 700,
-        }}>JD</div>
-        <span style={{ fontSize: 13, fontWeight: 600 }}>John Doe</span>
+        }}>CL</div>
+        <span style={{ fontSize: 13, fontWeight: 600 }}>Carlos Leon</span>
       </div>
     </nav>
   )
