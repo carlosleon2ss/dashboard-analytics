@@ -24,6 +24,17 @@ app.get('/health', (req, res) => {
 const server = http.createServer(app)
 initWebSocket(server)
 
+const path = require('path')
+
+// Sirve el frontend en producción
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../../frontend/dist')))
+
+  app.get('*path', (req, res) => {
+    res.sendFile(path.join(__dirname, '../../frontend/dist', 'index.html'))
+  })
+}
+
 server.listen(PORT, () => {
   console.log(` Servidor corriendo en http://localhost:${PORT}`)
   console.log(` WebSocket disponible en ws://localhost:${PORT}`)
