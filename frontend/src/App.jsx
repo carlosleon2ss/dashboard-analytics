@@ -7,6 +7,7 @@ import { KPICard }         from './components/KPICard'
 import { RealtimeChart }   from './components/RealtimeChart'
 import { DataTable }       from './components/DataTable'
 import { AnalyticsCharts } from './components/AnalyticsCharts'
+import { DateRangeFilter } from './components/DateRangeFilter'
 
 const MAX_CHART = 30
 
@@ -15,7 +16,25 @@ export default function App() {
   const [chartData, setChart] = useState([])
   const [tableRows, setRows]  = useState([])
   const [latency, setLatency] = useState(0)
+  const [range, setRange] = useState({
+  from: new Date(Date.now() - 24 * 60 * 60 * 1000),
+  to:   new Date(),
+})
+  
 
+  // Filtra las filas de la tabla según el rango seleccionado
+const filteredRows = tableRows.filter(r => {
+  const d = new Date(r.date)
+  return d >= range.from && d <= range.to
+})
+
+// Calcula stats de los eventos filtrados
+const stats = {
+  total:   filteredRows.length,
+  success: filteredRows.filter(r => r.status === 'completed').length,
+  warning: filteredRows.filter(r => r.status === 'pending').length,
+  error:   filteredRows.filter(r => r.status === 'failed').length,
+}
   useEffect(() => {
     if (!data) return
     const t0 = Date.now()
@@ -111,7 +130,13 @@ export default function App() {
             ))}
           </div>
         </div>
-
+            {/* Filtros */}
+        <DateRangeFilter
+          onRangeChange={setRange}
+          stats={stats}
+          rows={filteredRows}
+          range={range}
+        />
         {/* Section: KPI Cards */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
           <span style={{ color: 'var(--green)', fontSize: 14 }}>◎</span>
@@ -178,7 +203,7 @@ export default function App() {
         />
 
         {/* Section: Table */}
-        <DataTable rows={tableRows} />
+        <DataTable rows={filteredRows} />
 
       </div>
     </div>
