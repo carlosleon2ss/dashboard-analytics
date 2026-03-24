@@ -8,11 +8,26 @@ import { RealtimeChart }   from './components/RealtimeChart'
 import { DataTable }       from './components/DataTable'
 import { AnalyticsCharts } from './components/AnalyticsCharts'
 import { DateRangeFilter } from './components/DateRangeFilter'
+import { useAuth }     from './context/AuthContext'
+import { LoginPage }   from './pages/LoginPage'
 
 const MAX_CHART = 30
 
 export default function App() {
-  const { data, status }      = useWebSocket()
+  const { user, token, loading, logout } = useAuth()
+    // Muestra pantalla de carga mientras verifica el token
+  if (loading) return (
+    <div style={{
+      minHeight: '100vh', background: 'var(--bg-base)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontSize: 14, color: 'var(--text-sec)',
+    }}>Verificando sesión...</div>
+  )
+
+  // Si no hay usuario muestra el login
+  if (!user) return <LoginPage />
+
+  const { data, status }      = useWebSocket(token)
   const [chartData, setChart] = useState([])
   const [tableRows, setRows]  = useState([])
   const [latency, setLatency] = useState(0)
@@ -48,7 +63,7 @@ const stats = {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-base)' }}>
-      <Navbar status={status} latency={latency} />
+      <Navbar status={status} latency={latency} onLogout={logout} user={user}/>
 
       <div style={{ padding: '24px', maxWidth: 1400, margin: '0 auto' }}>
 

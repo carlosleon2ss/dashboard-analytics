@@ -4,6 +4,10 @@ const http = require('http')
 const cors = require('cors')
 const { initWebSocket } = require('./websocket')
 const apiRoutes = require('./routes/api')
+const { runMigrations } = require('./migrations')
+const authRoutes = require('./routes/auth')
+const { authMiddleware } = require('./middleware/auth')
+
 
 const app  = express()
 const PORT = process.env.PORT || 3001
@@ -11,9 +15,12 @@ const PORT = process.env.PORT || 3001
 // Middlewares
 app.use(cors({ origin: 'http://localhost:5173' }))
 app.use(express.json())
+app.use('/api/metrics', authMiddleware, apiRoutes)
+
 
 // Rutas REST
 app.use('/api', apiRoutes)
+app.use('/api/auth', authRoutes)
 
 // Health check
 app.get('/health', (req, res) => {
@@ -35,7 +42,10 @@ if (process.env.NODE_ENV === 'production') {
   })
 }
 
+// Inicia el servidor después de crear las tablas
+runMigrations().then(() => {
 server.listen(PORT, () => {
   console.log(` Servidor corriendo en http://localhost:${PORT}`)
   console.log(` WebSocket disponible en ws://localhost:${PORT}`)
+    })
 })

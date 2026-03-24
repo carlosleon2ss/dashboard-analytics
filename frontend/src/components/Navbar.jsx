@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 
-export function Navbar({ status, latency }) {
+export function Navbar({ status, latency, onLogout, user}) {
   const [time, setTime] = useState(new Date())
   const [uptime, setUptime] = useState(0)
 
@@ -70,8 +70,17 @@ export function Navbar({ status, latency }) {
           background: 'linear-gradient(135deg, var(--blue), var(--purple))',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 12, fontWeight: 700,
-        }}>CL</div>
-        <span style={{ fontSize: 13, fontWeight: 600 }}>Carlos Leon</span>
+        }}>
+          {user?.name?.charAt(0).toUpperCase() ?? 'U'}
+        </div>
+        <span style={{ fontSize: 13, fontWeight: 600 }}>
+          {user?.name ?? 'Usuario'}
+        </span>
+        <button onClick={onLogout} style={{
+          padding: '4px 12px', borderRadius: 6, border: '1px solid var(--border)',
+          background: 'transparent', color: 'var(--text-sec)',
+          fontSize: 12, cursor: 'pointer',
+        }}>Salir</button>
       </div>
     </nav>
   )

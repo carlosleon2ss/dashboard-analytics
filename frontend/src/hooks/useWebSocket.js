@@ -4,7 +4,7 @@ const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3001'
 const MAX_RECONNECT_ATTEMPTS = 5
 const RECONNECT_DELAY = 3000
 
-export function useWebSocket() {
+export function useWebSocket(token) {
   const [data, setData]           = useState(null)
   const [status, setStatus]       = useState('connecting') // connecting | open | closed | error
   const wsRef                     = useRef(null)
@@ -12,20 +12,20 @@ export function useWebSocket() {
   const reconnectTimeout          = useRef(null)
 
   const connect = useCallback(() => {
+    if (!token) return
     try {
-      const ws = new WebSocket(WS_URL)
+      // Pasa el token en la URL del WebSocket
+      const ws = new WebSocket(`${WS_BASE}?token=${token}`)
       wsRef.current = ws
 
       ws.onopen = () => {
-        console.log(' WebSocket conectado')
         setStatus('open')
         reconnectAttempts.current = 0
       }
 
       ws.onmessage = (event) => {
         try {
-          const parsed = JSON.parse(event.data)
-          setData(parsed)
+          setData(JSON.parse(event.data))
         } catch (e) {
           console.error('Error parseando mensaje:', e)
         }
@@ -33,10 +33,8 @@ export function useWebSocket() {
 
       ws.onclose = () => {
         setStatus('closed')
-        // Reconexión automática
         if (reconnectAttempts.current < MAX_RECONNECT_ATTEMPTS) {
           reconnectAttempts.current += 1
-          console.log(` Reconectando... intento ${reconnectAttempts.current}`)
           reconnectTimeout.current = setTimeout(connect, RECONNECT_DELAY)
         }
       }
@@ -49,7 +47,7 @@ export function useWebSocket() {
     } catch (e) {
       setStatus('error')
     }
-  }, [])
+  }, [token])
 
   useEffect(() => {
     connect()

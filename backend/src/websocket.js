@@ -1,3 +1,4 @@
+const jwt      = require('jsonwebtoken')
 const WebSocket = require('ws')
 const { generateMetrics } = require('./metricsSimulator')
 
@@ -6,8 +7,24 @@ function initWebSocket(server) {
 
   console.log('WebSocket server iniciado')
 
-  wss.on('connection', (ws) => {
-    console.log(' Cliente conectado')
+  wss.on('connection', (ws, req) => {
+    // Verifica token en la URL: ws://localhost:3001?token=XXX
+    const url   = new URL(req.url, 'http://localhost')
+    const token = url.searchParams.get('token')
+
+    if (!token) {
+      ws.close(1008, 'Token requerido')
+      return
+    }
+
+    try {
+      jwt.verify(token, process.env.JWT_SECRET)
+    } catch {
+      ws.close(1008, 'Token inválido')
+      return
+    }
+
+    console.log('Cliente conectado')
 
     // Envía métricas cada 2 segundos
     const interval = setInterval(() => {
