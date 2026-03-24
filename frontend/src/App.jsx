@@ -14,42 +14,17 @@ import { LoginPage }   from './pages/LoginPage'
 const MAX_CHART = 30
 
 export default function App() {
+  // ✅ TODOS los hooks primero, sin excepción
   const { user, token, loading, logout } = useAuth()
-    // Muestra pantalla de carga mientras verifica el token
-  if (loading) return (
-    <div style={{
-      minHeight: '100vh', background: 'var(--bg-base)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: 14, color: 'var(--text-sec)',
-    }}>Verificando sesión...</div>
-  )
+  const { data, status }                 = useWebSocket(token)
+  const [chartData, setChart]            = useState([])
+  const [tableRows, setRows]             = useState([])
+  const [latency, setLatency]            = useState(0)
+  const [range, setRange]                = useState({
+    from: new Date(Date.now() - 24 * 60 * 60 * 1000),
+    to:   new Date(),
+  })
 
-  // Si no hay usuario muestra el login
-  if (!user) return <LoginPage />
-
-  const { data, status }      = useWebSocket(token)
-  const [chartData, setChart] = useState([])
-  const [tableRows, setRows]  = useState([])
-  const [latency, setLatency] = useState(0)
-  const [range, setRange] = useState({
-  from: new Date(Date.now() - 24 * 60 * 60 * 1000),
-  to:   new Date(),
-})
-  
-
-  // Filtra las filas de la tabla según el rango seleccionado
-const filteredRows = tableRows.filter(r => {
-  const d = new Date(r.date)
-  return d >= range.from && d <= range.to
-})
-
-// Calcula stats de los eventos filtrados
-const stats = {
-  total:   filteredRows.length,
-  success: filteredRows.filter(r => r.status === 'completed').length,
-  warning: filteredRows.filter(r => r.status === 'pending').length,
-  error:   filteredRows.filter(r => r.status === 'failed').length,
-}
   useEffect(() => {
     if (!data) return
     const t0 = Date.now()
@@ -58,8 +33,32 @@ const stats = {
     setLatency(Date.now() - t0 + Math.floor(Math.random() * 40 + 10))
   }, [data])
 
+  // ✅ Lógica derivada después de los hooks
   const kpis = data?.kpis
   const now  = new Date()
+
+  const filteredRows = tableRows.filter(r => {
+    const d = new Date(r.date)
+    return d >= range.from && d <= range.to
+  })
+
+  const stats = {
+    total:   filteredRows.length,
+    success: filteredRows.filter(r => r.status === 'completed').length,
+    warning: filteredRows.filter(r => r.status === 'pending').length,
+    error:   filteredRows.filter(r => r.status === 'failed').length,
+  }
+
+  // ✅ Returns condicionales AL FINAL, después de todos los hooks
+  if (loading) return (
+    <div style={{
+      minHeight: '100vh', background: 'var(--bg-base)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontSize: 14, color: 'var(--text-sec)',
+    }}>Verificando sesión...</div>
+  )
+
+  if (!user) return <LoginPage />
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-base)' }}>
