@@ -16,7 +16,7 @@ const MAX_CHART = 30
 export default function App() {
   // ✅ TODOS los hooks primero, sin excepción
   const { user, token, loading, logout } = useAuth()
-  const { data, status }                 = useWebSocket(token)
+  //const { data, status }                 = useWebSocket(token)
   const [chartData, setChart]            = useState([])
   const [tableRows, setRows]             = useState([])
   const [latency, setLatency]            = useState(0)
