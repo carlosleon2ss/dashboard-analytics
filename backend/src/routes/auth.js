@@ -81,10 +81,13 @@ router.post('/register', async (req, res) => {
 
     const user  = result.rows[0]
     const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role, name: user.name },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN }
-    )
+  { id: user.id, email: user.email, role: user.role, name: user.name },
+  process.env.JWT_SECRET,
+  { 
+    // Si process.env.JWT_EXPIRES_IN no existe, usará '1d' (1 día) por defecto
+    expiresIn: process.env.JWT_EXPIRES_IN || '1d' 
+  }
+);
 
     res.status(201).json({ success: true, token, user })
 
