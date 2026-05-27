@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 
-const WS_BASE = import.meta.env.VITE_WS_URL || 'ws://https://dashboard-analytics-jxqu.onrender.com/'
+const WS_BASE = import.meta.env.VITE_WS_URL || 'ws://dashboard-analytics-jxqu.onrender.com/'
 const MAX_RECONNECT_ATTEMPTS = 5
 const RECONNECT_DELAY = 3000
 
